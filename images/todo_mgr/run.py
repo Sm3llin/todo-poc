@@ -31,6 +31,7 @@ if __name__ == '__main__':
         else:
             events.append(b'{"type": "TodoCreated", "payload": {"todo_id": %d, "title": "another todo"}}' % x)
 
+    events.append(b'{"type": "TodoModified", "payload": {"todo_id": 4, "title": "Another Todo"}}')
     start = time.time()
     count = 0
     for event in events:
@@ -52,3 +53,11 @@ if __name__ == '__main__':
     print(session.query(Todo).all())
 
     print(f"(catchup) time elapsed: {elapsed}, count: {count}")
+
+    Todo.update(41, description="this description does description things")
+
+    todo4 = session.query(Todo).get(4)
+    todo41 = session.query(Todo).get(41)
+
+    print(todo4, todo4.__dict__)
+    print(todo41, todo41.__dict__)
