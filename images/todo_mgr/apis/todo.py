@@ -13,8 +13,8 @@ todo = api.model('Todo', {
 
 
 todo_parser = api.parser()
-todo_parser.add_argument('title', type=str, help='Rate cannot be converted', required=True)
-todo_parser.add_argument('description', type=str, help='Rate cannot be converted')
+todo_parser.add_argument('title', type=str, help='Title to display on card', required=True)
+todo_parser.add_argument('description', type=str, help='Brief description of Todo')
 
 
 @api.route('/')
