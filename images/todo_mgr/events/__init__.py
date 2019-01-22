@@ -1,4 +1,5 @@
 import json
+from dataclasses import asdict
 from typing import Dict, Type
 
 
@@ -32,7 +33,7 @@ class Event:
 
         event = cls(*args, **kwargs)
 
-        print("publishing event", event)
+        print(f'publishing event "{event.__class__.__name__}" to "{event.__topic__}"', event)
         todo_store.push(event)
 
         return event

@@ -7,6 +7,7 @@ Base = declarative_base()
 
 engine = create_engine('sqlite:///sqlalchemy_example.db')
 # engine = create_engine('postgres://postgres:example@0.0.0.0:5432')
+
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
 Base.metadata.bind = engine
