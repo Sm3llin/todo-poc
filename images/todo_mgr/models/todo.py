@@ -39,12 +39,11 @@ class Todo(Base):
             try:
                 session.commit()
             except IntegrityError:
-                return None
+                return False
 
-            print(TodoDeleted.publish(todo_id=todo_id))
-            return
+            return TodoDeleted.publish(todo_id=todo_id) is not None
         else:
-            raise ValueError
+            return False
 
     @staticmethod
     def update(todo_id: int, title: Optional[str] = None, description: Optional[str] = None):

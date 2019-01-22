@@ -67,3 +67,13 @@ class Todo(Resource):
         if success:
             return "", 200
         api.abort(404, "Todo {} doesn't exist".format(id))
+
+    @api.doc('delete_todo')
+    @api.response(200, "Todo deleted")
+    def delete(self, id):
+        """delete a todo by its given identifier"""
+        success = TodoModel.delete(todo_id=id)
+
+        if success:
+            return "", 200
+        api.abort(404, "Todo {} doesn't exist".format(id))
