@@ -56,7 +56,12 @@ class Todo(Base):
             update[Todo.description] = description
 
         if session.query(Todo).filter_by(todo_id=todo_id).update(update):
-            return TodoModified.publish(todo_id, title=title, description=description)
+            try:
+                session.commit()
+            except IntegrityError:
+                return False
+
+            return TodoModified.publish(todo_id, title=title, description=description) is not None
         return False
 
     @staticmethod
