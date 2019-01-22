@@ -26,7 +26,7 @@ class TodoList(Resource):
     @api.marshal_list_with(todo)
     def get(self):
         """list all todos"""
-        return session.query(Todo).all()
+        return session.query(TodoModel).all()
 
     @api.doc("create_todo")
     @api.expect(todo_parser)

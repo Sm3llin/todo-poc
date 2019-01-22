@@ -8,6 +8,18 @@ from db import Base, session
 from events.todo import TodoCreated, TodoDeleted, TodoModified
 
 
+def method_dispatch(func):
+    # wrap the function with a dispatcher
+    dispatcher = functools.singledispatch(func)
+
+    def wrapper(*args, **kw):
+        return dispatcher.dispatch(args[0].__class__)(*args, **kw)
+
+    wrapper.register = dispatcher.register
+    functools.update_wrapper(wrapper, func)
+    return wrapper
+
+
 class Todo(Base):
     __tablename__ = "todos"
 
@@ -63,37 +75,36 @@ class Todo(Base):
             return TodoModified.publish(todo_id, title=title, description=description) is not None
         return False
 
-    @staticmethod
-    @functools.singledispatch
-    def apply(event):
+    @method_dispatch
+    def apply(_):
         raise NotImplementedError()
 
+    @staticmethod
+    @apply.register(TodoCreated)
+    def _(event: TodoCreated):
+        todo = Todo(todo_id=event.todo_id, title=event.title, description=event.description)
 
-@Todo.apply.register(TodoCreated)
-def _(event: TodoCreated):
-    todo = Todo(todo_id=event.todo_id, title=event.title, description=event.description)
+        session.add(todo)
 
-    session.add(todo)
+        return event
 
-    return event
+    @staticmethod
+    @apply.register(TodoDeleted)
+    def _(event: TodoDeleted):
+        session.query(Todo).filter_by(todo_id=event.todo_id).delete()
 
+        return event
 
-@Todo.apply.register(TodoDeleted)
-def _(event: TodoDeleted):
-    session.query(Todo).filter_by(todo_id=event.todo_id).delete()
+    @staticmethod
+    @apply.register(TodoModified)
+    def _(event: TodoModified):
+        update = {}
 
-    return event
+        if event.title:
+            update[Todo.title] = event.title
+        if event.description:
+            update[Todo.description] = event.description
 
+        session.query(Todo).filter_by(todo_id=event.todo_id).update(update)
 
-@Todo.apply.register(TodoModified)
-def _(event: TodoModified):
-    update = {}
-
-    if event.title:
-        update[Todo.title] = event.title
-    if event.description:
-        update[Todo.description] = event.description
-
-    session.query(Todo).filter_by(todo_id=event.todo_id).update(update)
-
-    return event
+        return event
